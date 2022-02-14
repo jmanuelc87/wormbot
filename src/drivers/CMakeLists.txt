@@ -51,13 +51,13 @@ catkin_python_setup()
 add_message_files(
   FILES
   Speed.msg
+  Duty.msg
 )
 
 ## Generate services in the 'srv' folder
-add_service_files(
-  FILES
-  Duty.srv
-)
+# add_service_files(
+#  FILES
+# )
 
 ## Generate actions in the 'action' folder
 # add_action_files(

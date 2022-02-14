@@ -7,8 +7,7 @@ from simple_pid import PID
 
 from board import MotorDriver
 from board import SpinEnum
-from drivers.msg import Speed
-from drivers.srv import Duty
+from drivers.msg import Speed, Duty
 from drivers.cfg import PIDLimitsConfig
 from dynamic_reconfigure.server import Server
 
@@ -78,7 +77,7 @@ rospy.init_node("driver_node")
 server = Server(PIDLimitsConfig, reconfigure_callback)
 
 # Create set motor speed service
-rospy.Service(ns + "drivers/set_motor_duty", Duty, set_motor_duty)
+rospy.Subscriber(ns + "drivers/set_motor_duty", Duty, set_motor_duty)
 speedPublisher = rospy.Publisher(ns + "drivers/get_motor_speed", Speed, queue_size=1)
 
 rate = rospy.Rate(15)
