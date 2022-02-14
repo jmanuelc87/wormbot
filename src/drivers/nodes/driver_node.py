@@ -79,7 +79,7 @@ server = Server(PIDLimitsConfig, reconfigure_callback)
 
 # Create set motor speed service
 rospy.Service(ns + "drivers/set_motor_duty", Duty, set_motor_duty)
-speedPublisher = rospy.Publisher(ns + "drivers/get_motor_speed", Speed, 1)
+speedPublisher = rospy.Publisher(ns + "drivers/get_motor_speed", Speed, queue_size=1)
 
 rate = rospy.Rate(15)
 
