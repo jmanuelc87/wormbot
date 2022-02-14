@@ -69,11 +69,11 @@ def orientation(message):
         raise RuntimeError("Can't map the orientation")
 
 
-# Create Reconfigure Configure Server
-server = Server(PIDLimitsConfig, reconfigure_callback)
-
 # Start Node
 rospy.init_node("driver_node")
+
+# Create Reconfigure Configure Server
+server = Server(PIDLimitsConfig, reconfigure_callback)
 
 # Create set motor speed service
 dutySubscriber = rospy.Subscriber(ns + "/drivers/set_motor_duty", Duty, set_motor_duty)
