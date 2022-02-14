@@ -7,7 +7,8 @@ from simple_pid import PID
 
 from board import MotorDriver
 from board import SpinEnum
-from drivers.msg import Speed, Duty
+from drivers.msg import Speed
+from drivers.srv import Duty
 from drivers.cfg import PIDLimitsConfig
 from dynamic_reconfigure.server import Server
 
@@ -20,10 +21,10 @@ pid_values = {
 
 motor_duty = {
     "mL": 0,
-    "mR": 0,
-    "orientationL": SpinEnum.CW,
-    "orientationR": SpinEnum.CCW
+    "mR": 0
 }
+
+spins = []
 
 # Namespace
 ns = rospy.get_namespace()
@@ -53,20 +54,21 @@ def set_motor_duty(message):
     motor_duty["mL"] = message.dutyL
     motor_duty["mR"] = message.dutyR
 
-    pidL.setpoint = message.dutyL
-    pidR.setpoint = message.dutyR
-
-    motor_duty["orientationL"] = orientation(message.orientationL)
-    motor_duty["orientationR"] = orientation(message.orientationR)
-
-
-def orientation(message):
-    if message == 1:
-        return SpinEnum.CW.value
-    elif message == 2:
-        return SpinEnum.CCW.value
+    if motor_duty["mL"] > 0:
+        spins.append(SpinEnum.CCW.value)
+    elif motor_duty["mL"] < 0:
+        spins.append(SpinEnum.CW.value)
     else:
-        raise RuntimeError("Can't map the orientation")
+        spins.append(SpinEnum.STOP.value)
+
+    if motor_duty["mR"] > 0:
+        spins.append(SpinEnum.CW.value)
+    elif motor_duty["mR"] < 0:
+        spins.append(SpinEnum.CCW.value)
+    else:
+        spins.append(SpinEnum.STOP.value)
+
+    rospy.loginfo("%s %s", motor_duty, spins)
 
 
 # Start Node
@@ -112,12 +114,9 @@ speeds = driver.speed()
 speedPublisher.publish(Speed(speedL=speeds[0], speedR=speeds[1]))
 
 while not rospy.is_shutdown():
-    control_duty1 = pidL(motor_duty["mL"])
-    control_duty2 = pidR(motor_duty["mR"])
+    rospy.loginfo("%s %s", motor_duty["mL"], motor_duty["mR"])
 
-    rospy.loginfo("%s %s", control_duty1, control_duty2)
-
-    driver.move([control_duty1, control_duty2], [bytes(motor_duty["orientationL"]), bytes(motor_duty["orientationR"])])
+    driver.move([motor_duty["mL"], motor_duty["mR"]], spins)
 
     speeds = driver.speed()
 
