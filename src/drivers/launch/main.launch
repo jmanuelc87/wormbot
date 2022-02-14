@@ -1,0 +1,4 @@
+<?xml version="1.0"?>
+<launch>
+    <node pkg="drivers" type="driver_node.py" name="driver_node" ns="/wormbot" output="screen"/>
+</launch>
