@@ -34,7 +34,7 @@ pidR = PID(Kp=pid_values["Kp"], Ki=pid_values["Ki"], Kd=pid_values["Kd"])
 # motor driver
 driver = MotorDriver(1, 0x10)
 
-l = driver.detecte()
+l = driver.detect()
 rospy.loginfo("Board list conform: %s", l)
 
 
