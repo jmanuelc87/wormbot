@@ -56,19 +56,28 @@ def set_motor_duty(message):
     pidL.setpoint = message.dutyL
     pidR.setpoint = message.dutyR
 
-    motor_duty["orientationL"] = message.orientationL
-    motor_duty["orientationR"] = message.orientationR
+    motor_duty["orientationL"] = orientation(message.orientationL)
+    motor_duty["orientationR"] = orientation(message.orientationR)
+
+
+def orientation(message):
+    if message == 1:
+        return SpinEnum.CW
+    elif message == 2:
+        return SpinEnum.CCW
+    else:
+        raise RuntimeError("Can't map the orientation")
 
 
 # Create Reconfigure Configure Server
 server = Server(PIDLimitsConfig, reconfigure_callback)
 
+# Start Node
+rospy.init_node("driver_node")
+
 # Create set motor speed service
 dutySubscriber = rospy.Subscriber(ns + "/drivers/set_motor_duty", Duty, set_motor_duty)
 speedPublisher = rospy.Publisher(ns + "/drivers/get_motor_speed", Speed)
-
-# Start Node
-rospy.init_node("driver_node")
 
 rate = rospy.Rate(30)
 
