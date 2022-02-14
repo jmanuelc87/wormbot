@@ -34,6 +34,22 @@ pidR = PID(Kp=pid_values["Kp"], Ki=pid_values["Ki"], Kd=pid_values["Kd"])
 # motor driver
 driver = MotorDriver(1, 0x10)
 
+l = driver.detecte()
+rospy.loginfo("Board list conform: %s", l)
+
+
+def print_board_status():
+    if driver.last_operate_status == driver.STA_OK:
+        print("driver status: everything ok")
+    elif driver.last_operate_status == driver.STA_ERR:
+        print("driver status: unexpected error")
+    elif driver.last_operate_status == driver.STA_ERR_DEVICE_NOT_DETECTED:
+        print("driver status: device not detected")
+    elif driver.last_operate_status == driver.STA_ERR_PARAMETER:
+        print("driver status: parameter error, last operate no effective")
+    elif driver.last_operate_status == driver.STA_ERR_SOFT_VERSION:
+        print("driver status: unsupport driver framware version")
+
 
 def reconfigure_callback(config, level):
     pidL.Kp = config.Kp
@@ -72,6 +88,7 @@ def set_motor_duty(message):
 def on_shutdown():
     driver.motor_stop(MotorDriver.ALL)
 
+
 # Start Node
 rospy.init_node("driver_node")
 
@@ -88,7 +105,11 @@ rospy.on_shutdown(on_shutdown)
 
 rospy.loginfo("Connection to motor board beginning")
 
-driver.begin()
+while driver.begin() != MotorDriver.STA_OK:    # Board begin and check board status
+    print_board_status()
+    rospy.loginfo("board begin failed")
+    time.sleep(2)
+rospy.loginfo("board begin success")
 
 time.sleep(2)
 
