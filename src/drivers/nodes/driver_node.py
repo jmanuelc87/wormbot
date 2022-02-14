@@ -5,8 +5,7 @@ import rospy
 
 from simple_pid import PID
 
-from board import MotorDriver
-from board import SpinEnum
+from board import MotorDriverI2C as MotorDriver
 from drivers.msg import Speed, Duty
 from drivers.cfg import PIDLimitsConfig
 from dynamic_reconfigure.server import Server
@@ -54,18 +53,18 @@ def set_motor_duty(message):
     motor_duty["mR"] = message.dutyR
 
     if motor_duty["mL"] > 0:
-        spins.append(SpinEnum.CCW.value)
+        spins.append(MotorDriver.CCW)
     elif motor_duty["mL"] < 0:
-        spins.append(SpinEnum.CW.value)
+        spins.append(MotorDriver.CW)
     else:
-        spins.append(SpinEnum.STOP.value)
+        spins.append(MotorDriver.STOP)
 
     if motor_duty["mR"] > 0:
-        spins.append(SpinEnum.CW.value)
+        spins.append(MotorDriver.CW)
     elif motor_duty["mR"] < 0:
-        spins.append(SpinEnum.CCW.value)
+        spins.append(MotorDriver.CCW)
     else:
-        spins.append(SpinEnum.STOP.value)
+        spins.append(MotorDriver.STOP)
 
     rospy.loginfo("%s %s", motor_duty, spins)
 
@@ -82,7 +81,7 @@ speedPublisher = rospy.Publisher(ns + "drivers/get_motor_speed", Speed, queue_si
 
 rate = rospy.Rate(15)
 
-rospy.on_shutdown(driver.stop)
+rospy.on_shutdown(driver.motor_stop)
 
 rospy.loginfo("Connection to motor board beginning")
 
@@ -92,30 +91,30 @@ time.sleep(2)
 
 rospy.loginfo("Motor encoder is being enabled")
 
-driver.enable()
+driver.set_encoder_enable(MotorDriver.ALL)
 
 time.sleep(2)
 
 rospy.loginfo("Setting motor reduction ratio")
 
-driver.reduction_ratio(60)
+driver.set_encoder_reduction_ratio(MotorDriver.ALL, 60)
 
 time.sleep(2)
 
 rospy.loginfo("Setting PWM frequency")
 
-driver.pwm_frequency(1000)
+driver.set_motor_pwm_frequency(1000)
 
 time.sleep(2)
 
-speeds = driver.speed()
+speeds = driver.get_encoder_speed()
 
 speedPublisher.publish(Speed(speedL=speeds[0], speedR=speeds[1]))
 
 while not rospy.is_shutdown():
-    driver.move([motor_duty["mL"], motor_duty["mR"]], spins)
+    driver.motor_movement(MotorDriver.ALL, spins, [motor_duty["mL"], motor_duty["mR"]])
 
-    speeds = driver.speed()
+    speeds = driver.get_encoder_speed()
 
     speedPublisher.publish(Speed(speedL=speeds[0], speedR=speeds[1]))
 
