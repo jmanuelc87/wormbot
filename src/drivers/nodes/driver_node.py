@@ -69,6 +69,9 @@ def set_motor_duty(message):
     rospy.loginfo("%s %s", motor_duty, spins)
 
 
+def on_shutdown():
+    driver.motor_stop(MotorDriver.ALL)
+
 # Start Node
 rospy.init_node("driver_node")
 
@@ -81,7 +84,7 @@ speedPublisher = rospy.Publisher(ns + "drivers/get_motor_speed", Speed, queue_si
 
 rate = rospy.Rate(15)
 
-rospy.on_shutdown(driver.motor_stop)
+rospy.on_shutdown(on_shutdown)
 
 rospy.loginfo("Connection to motor board beginning")
 
@@ -107,14 +110,14 @@ driver.set_motor_pwm_frequency(1000)
 
 time.sleep(2)
 
-speeds = driver.get_encoder_speed()
+speeds = driver.get_encoder_speed(MotorDriver.ALL)
 
 speedPublisher.publish(Speed(speedL=speeds[0], speedR=speeds[1]))
 
 while not rospy.is_shutdown():
     driver.motor_movement(MotorDriver.ALL, spins, [motor_duty["mL"], motor_duty["mR"]])
 
-    speeds = driver.get_encoder_speed()
+    speeds = driver.get_encoder_speed(MotorDriver.ALL)
 
     speedPublisher.publish(Speed(speedL=speeds[0], speedR=speeds[1]))
 
