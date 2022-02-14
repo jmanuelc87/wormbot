@@ -76,10 +76,10 @@ rospy.init_node("driver_node")
 server = Server(PIDLimitsConfig, reconfigure_callback)
 
 # Create set motor speed service
-dutySubscriber = rospy.Subscriber(ns + "/drivers/set_motor_duty", Duty, set_motor_duty)
+rospy.Service(ns + "/drivers/set_motor_duty", Duty, set_motor_duty)
 speedPublisher = rospy.Publisher(ns + "/drivers/get_motor_speed", Speed)
 
-rate = rospy.Rate(30)
+rate = rospy.Rate(15)
 
 rospy.on_shutdown(driver.stop)
 
@@ -114,6 +114,8 @@ speedPublisher.publish(Speed(speedL=speeds[0], speedR=speeds[1]))
 while not rospy.is_shutdown():
     control_duty1 = pidL(motor_duty["mL"])
     control_duty2 = pidR(motor_duty["mR"])
+
+    rospy.loginfo("%s %s", control_duty1, control_duty2)
 
     driver.move([control_duty1, control_duty2], [bytes(motor_duty["orientationL"]), bytes(motor_duty["orientationR"])])
 
