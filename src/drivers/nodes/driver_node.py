@@ -32,7 +32,7 @@ pidL = PID(Kp=pid_values["Kp"], Ki=pid_values["Ki"], Kd=pid_values["Kd"])
 pidR = PID(Kp=pid_values["Kp"], Ki=pid_values["Ki"], Kd=pid_values["Kd"])
 
 # motor driver
-driver = MotorDriver()
+driver = MotorDriver(1, 0x10)
 
 
 def reconfigure_callback(config, level):
