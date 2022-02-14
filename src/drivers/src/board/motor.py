@@ -131,5 +131,5 @@ class Motor:
         return False
 
     def stop(self):
-        self._i2c.write_bytes(self._REG_MOTOR1_ORIENTATION + 3 * (self._id - 1), [SpinEnum.STOP])
+        self._i2c.write_bytes(self._REG_MOTOR1_ORIENTATION + 3 * (self._id - 1), [SpinEnum.STOP.value])
         return self._i2c.last_operate_status == _Status.STA_OK

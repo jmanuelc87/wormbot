@@ -62,9 +62,9 @@ def set_motor_duty(message):
 
 def orientation(message):
     if message == 1:
-        return SpinEnum.CW
+        return SpinEnum.CW.value
     elif message == 2:
-        return SpinEnum.CCW
+        return SpinEnum.CCW.value
     else:
         raise RuntimeError("Can't map the orientation")
 
