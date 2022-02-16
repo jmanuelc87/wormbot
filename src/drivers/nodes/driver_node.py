@@ -41,7 +41,7 @@ l = driver.detect()
 rospy.loginfo("Board list conform: %s", l)
 
 # Start Node
-rospy.init_node("driver_node")
+rospy.init_node("driver_node", log_level=rospy.DEBUG)
 
 
 def print_board_status():
@@ -74,38 +74,31 @@ def set_motor_speed(message):
     global motor_left_speed
     global motor_right_speed
     global spins
-    rospy.loginfo("%s", message)
 
     lock.acquire()
     spins = []
     if message.speedL > 0:
         motor_left_speed = int((message.speedL / 160) * 100)
         spins.append(MotorDriver.CW)
-        rospy.loginfo("move forward")
     elif message.speedL < 0:
         motor_left_speed = int((-message.speedL / 160) * 100)
         spins.append(MotorDriver.CCW)
-        rospy.loginfo("move backward")
     else:
         motor_left_speed = 0
         spins.append(MotorDriver.STOP)
-        rospy.loginfo("Stop")
 
     if message.speedR > 0:
         motor_right_speed = int((message.speedR / 160) * 100)
         spins.append(MotorDriver.CCW)
-        rospy.loginfo("move forward")
     elif message.speedR < 0:
         motor_right_speed = int((-message.speedR / 160) * 100)
         spins.append(MotorDriver.CW)
-        rospy.loginfo("move backward")
     else:
         motor_right_speed = 0
         spins.append(MotorDriver.STOP)
-        rospy.loginfo("Stop")
     lock.release()
 
-    rospy.loginfo("Speed %s, %s, Spin: %s", motor_left_speed, motor_right_speed, spins)
+    rospy.logdebug("Speed %s, %s, Spin: %s", motor_left_speed, motor_right_speed, spins)
 
 
 def on_shutdown():
