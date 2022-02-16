@@ -78,9 +78,11 @@ def set_motor_speed(message):
     if message.speedL > 0:
         motor_left_speed = int((message.speedL / 160) * 100)
         spins.append(MotorDriver.CW)
+        rospy.loginfo("move forward")
     elif message.speedL < 0:
         motor_left_speed = int((-message.speedL / 160) * 100)
         spins.append(MotorDriver.CCW)
+        rospy.loginfo("move backward")
     else:
         motor_left_speed = 0
         spins.append(MotorDriver.STOP)
@@ -89,9 +91,11 @@ def set_motor_speed(message):
     if message.speedR > 0:
         motor_right_speed = int((message.speedR / 160) * 100)
         spins.append(MotorDriver.CCW)
+        rospy.loginfo("move forward")
     elif message.speedR < 0:
         motor_right_speed = int((-message.speedR / 160) * 100)
         spins.append(MotorDriver.CW)
+        rospy.loginfo("move backward")
     else:
         motor_right_speed = 0
         spins.append(MotorDriver.STOP)
