@@ -142,6 +142,9 @@ while not rospy.is_shutdown():
     # TODO: SETUP PID
     driver.motor_movement(MotorDriver.ALL, MotorDriver.CW, [motor_left_speed, motor_right_speed])
 
+    if driver.last_operate_status != driver.STA_OK:
+        print_board_status()
+
     lock.release()
 
     speeds = driver.get_encoder_speed(MotorDriver.ALL)
