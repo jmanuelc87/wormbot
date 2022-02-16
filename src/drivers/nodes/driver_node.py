@@ -75,6 +75,8 @@ def set_motor_speed(message):
     global motor_right_speed
     global spins
 
+    rospy.loginfo("%s", message)
+
     lock.acquire()
     spins = []
     if message.speedL > 0:
