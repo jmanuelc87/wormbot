@@ -78,20 +78,20 @@ def set_motor_speed(message):
     lock.acquire()
     spins = []
     if message.speedL > 0:
-        motor_left_speed = int((message.speedL / 160) * 100)
+        motor_left_speed = (message.speedL / 160) * 100
         spins.append(MotorDriver.CW)
     elif message.speedL < 0:
-        motor_left_speed = int((-message.speedL / 160) * 100)
+        motor_left_speed = (-message.speedL / 160) * 100
         spins.append(MotorDriver.CCW)
     else:
         motor_left_speed = 0
         spins.append(MotorDriver.STOP)
 
     if message.speedR > 0:
-        motor_right_speed = int((message.speedR / 160) * 100)
+        motor_right_speed = (message.speedR / 160) * 100
         spins.append(MotorDriver.CCW)
     elif message.speedR < 0:
-        motor_right_speed = int((-message.speedR / 160) * 100)
+        motor_right_speed = (-message.speedR / 160) * 100
         spins.append(MotorDriver.CW)
     else:
         motor_right_speed = 0
@@ -140,7 +140,7 @@ rate = rospy.Rate(24)
 while not rospy.is_shutdown():
     lock.acquire()
     # TODO: SETUP PID
-    driver.motor_movement(MotorDriver.ALL, spins, [int(motor_left_speed), int(motor_right_speed)])
+    driver.motor_movement(MotorDriver.ALL, spins, [motor_left_speed, motor_right_speed])
     lock.release()
 
     speeds = driver.get_encoder_speed(MotorDriver.ALL)
