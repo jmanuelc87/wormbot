@@ -140,10 +140,7 @@ rate = rospy.Rate(24)
 while not rospy.is_shutdown():
     lock.acquire()
     # TODO: SETUP PID
-    driver.motor_movement(MotorDriver.ALL, MotorDriver.CW, [motor_left_speed, motor_right_speed])
-
-    if driver.last_operate_status != driver.STA_OK:
-        print_board_status()
+    driver.motor_movement(MotorDriver.M1, MotorDriver.CW, motor_left_speed)
 
     lock.release()
 
