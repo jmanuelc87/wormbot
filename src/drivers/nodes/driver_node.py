@@ -20,8 +20,6 @@ pid_values = {
     "Kd": 0.0798
 }
 
-lock = threading.Lock()
-
 motor_left_speed = 0
 motor_right_speed = 0
 
@@ -71,9 +69,11 @@ def reconfigure_callback(config, level):
 
 
 def set_motor_speed(message):
+    global motor_left_speed
+    global motor_right_speed
+    global spins
     rospy.loginfo("%s", message)
 
-    lock.acquire()
     spins = []
     if message.speedL > 0:
         motor_left_speed = int((message.speedL / 160) * 100)
@@ -100,7 +100,6 @@ def set_motor_speed(message):
         motor_right_speed = 0
         spins.append(MotorDriver.STOP)
         rospy.loginfo("Stop")
-    lock.release()
 
     rospy.loginfo("Speed %s, %s, Spin: %s", motor_left_speed, motor_right_speed, spins)
 
@@ -142,10 +141,8 @@ rospy.loginfo("Starting main loop...")
 rate = rospy.Rate(24)
 
 while not rospy.is_shutdown():
-    lock.acquire()
     # TODO: SETUP PID
     driver.motor_movement(MotorDriver.ALL, spins, [motor_left_speed, motor_right_speed])
-    lock.release()
 
     speeds = driver.get_encoder_speed(MotorDriver.ALL)
 
