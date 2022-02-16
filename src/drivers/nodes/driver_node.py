@@ -70,12 +70,10 @@ def reconfigure_callback(config, level):
     return config
 
 
-def set_motor_duty(message):
+def set_motor_speed(message):
     global motor_left_speed
     global motor_right_speed
     global spins
-
-    rospy.loginfo("%d %d", message.speedL, message.speedR)
 
     lock.acquire()
     spins = []
@@ -100,6 +98,8 @@ def set_motor_duty(message):
         spins.append(MotorDriver.STOP)
     lock.release()
 
+    rospy.loginfo("Set speed from message")
+
 
 def on_shutdown():
     driver.motor_stop(MotorDriver.ALL)
@@ -110,7 +110,7 @@ def on_shutdown():
 server = Server(PIDLimitsConfig, reconfigure_callback)
 
 # Create set motor speed service
-rospy.Subscriber(ns + "drivers/set_motor_speed", Speed, callback=set_motor_duty)
+rospy.Subscriber(ns + "drivers/set_motor_speed", Speed, callback=set_motor_speed)
 speedPublisher = rospy.Publisher(ns + "drivers/get_motor_speed", Speed, queue_size=10, latch=True)
 
 rospy.on_shutdown(on_shutdown)
