@@ -84,16 +84,18 @@ def set_motor_speed(message):
     else:
         motor_left_speed = 0
         spins.append(MotorDriver.STOP)
+        rospy.loginfo("Stop")
 
     if message.speedR > 0:
         motor_right_speed = int((message.speedR / 160) * 100)
-        spins.append(MotorDriver.CW)
+        spins.append(MotorDriver.CCW)
     elif message.speedR < 0:
         motor_right_speed = int((-message.speedR / 160) * 100)
-        spins.append(MotorDriver.CCW)
+        spins.append(MotorDriver.CW)
     else:
         motor_right_speed = 0
         spins.append(MotorDriver.STOP)
+        rospy.loginfo("Stop")
     lock.release()
 
     rospy.loginfo("Speed %s, %s, Spin: %s", motor_left_speed, motor_right_speed, spins)
