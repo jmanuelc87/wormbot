@@ -77,7 +77,7 @@ def set_motor_speed(message):
 
     rospy.loginfo("%s", message)
 
-    # lock.acquire()
+    lock.acquire()
     spins = []
     if message.speedL > 0:
         motor_left_speed = (message.speedL / 160) * 100
@@ -98,9 +98,9 @@ def set_motor_speed(message):
     else:
         motor_right_speed = 0
         spins.append(MotorDriver.STOP)
-    # lock.release()
+    lock.release()
 
-    rospy.loginfo("Speed %d, %d", motor_left_speed, motor_right_speed)
+    rospy.loginfo("Speed %s, %s, Spin: %s", motor_left_speed, motor_right_speed, spins)
 
 
 def on_shutdown():
@@ -140,10 +140,10 @@ rospy.loginfo("Starting main loop...")
 rate = rospy.Rate(24)
 
 while not rospy.is_shutdown():
-    # lock.acquire()
+    lock.acquire()
     # TODO: SETUP PID
     driver.motor_movement(MotorDriver.ALL, spins, [motor_left_speed, motor_right_speed])
-    # lock.release()
+    lock.release()
 
     speeds = driver.get_encoder_speed(MotorDriver.ALL)
 
