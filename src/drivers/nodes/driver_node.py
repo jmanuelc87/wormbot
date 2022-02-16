@@ -143,6 +143,9 @@ while not rospy.is_shutdown():
     driver.motor_movement(MotorDriver.ALL, spins, [motor_left_speed, motor_right_speed])
     lock.release()
 
+    if driver.last_operate_status != driver.STA_OK:
+        rospy.loginfo("Error: %s", driver.last_operate_status)
+
     speeds = driver.get_encoder_speed(MotorDriver.ALL)
 
     speedPublisher.publish(Speed(speedL=speeds[0], speedR=speeds[1]))
