@@ -98,7 +98,7 @@ def set_motor_speed(message):
         spins.append(MotorDriver.STOP)
     lock.release()
 
-    rospy.loginfo("Set speed from message")
+    rospy.loginfo("Speed %d, %d", motor_left_speed, motor_right_speed)
 
 
 def on_shutdown():
