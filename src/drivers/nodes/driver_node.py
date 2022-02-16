@@ -8,7 +8,7 @@ from simple_pid import PID
 
 from board import MotorDriverI2C as MotorDriver
 
-from drivers.msg import Speed, Duty
+from drivers.msg import Speed
 from drivers.cfg import PIDLimitsConfig
 
 from dynamic_reconfigure.server import Server
