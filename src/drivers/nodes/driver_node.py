@@ -140,11 +140,8 @@ rate = rospy.Rate(24)
 while not rospy.is_shutdown():
     lock.acquire()
     # TODO: SETUP PID
-    driver.motor_movement(MotorDriver.ALL, spins, [motor_left_speed, motor_right_speed])
+    driver.motor_movement(MotorDriver.ALL, spins, [int(motor_left_speed), int(motor_right_speed)])
     lock.release()
-
-    if driver.last_operate_status != driver.STA_OK:
-        rospy.loginfo("Error: %s", driver.last_operate_status)
 
     speeds = driver.get_encoder_speed(MotorDriver.ALL)
 
