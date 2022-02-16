@@ -46,15 +46,15 @@ rospy.init_node("driver_node", log_level=rospy.DEBUG)
 
 def print_board_status():
     if driver.last_operate_status == driver.STA_OK:
-        print("driver status: everything ok")
+        rospy.logdebug("driver status: everything ok")
     elif driver.last_operate_status == driver.STA_ERR:
-        print("driver status: unexpected error")
+        rospy.logdebug("driver status: unexpected error")
     elif driver.last_operate_status == driver.STA_ERR_DEVICE_NOT_DETECTED:
-        print("driver status: device not detected")
+        rospy.logdebug("driver status: device not detected")
     elif driver.last_operate_status == driver.STA_ERR_PARAMETER:
-        print("driver status: parameter error, last operate no effective")
+        rospy.logdebug("driver status: parameter error, last operate no effective")
     elif driver.last_operate_status == driver.STA_ERR_SOFT_VERSION:
-        print("driver status: unsupport driver framware version")
+        rospy.logdebug("driver status: unsupport driver framware version")
 
 
 def reconfigure_callback(config, level):
@@ -141,6 +141,11 @@ while not rospy.is_shutdown():
     lock.acquire()
     # TODO: SETUP PID
     driver.motor_movement(MotorDriver.ALL, spins, [motor_left_speed, motor_right_speed])
+
+    if driver.last_operate_status != driver.STA_OK:
+        rospy.loginfo("Error")
+        print_board_status()
+
     lock.release()
 
     speeds = driver.get_encoder_speed(MotorDriver.ALL)
