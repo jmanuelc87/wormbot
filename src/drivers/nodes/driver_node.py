@@ -142,7 +142,7 @@ while not rospy.is_shutdown():
     # TODO: SETUP PID
     for p in zip([MotorDriver.M1, MotorDriver.M2], spins, [motor_left_speed, motor_right_speed]):
         if p[1] == MotorDriver.STOP:
-            driver.motor_stop(p[0])
+            driver.motor_stop([p[0]])
         else:
             driver.motor_movement([p[0]], p[1], p[2])
     lock.release()
