@@ -1,2 +1,2 @@
-uint8 speedL
-uint8 speedR
+int8 speedL
+int8 speedR

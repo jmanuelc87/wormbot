@@ -1,13 +1,16 @@
 #!/usr/bin/python
 import time
-
 import rospy
+import threading
+
 
 from simple_pid import PID
 
 from board import MotorDriverI2C as MotorDriver
+
 from drivers.msg import Speed, Duty
 from drivers.cfg import PIDLimitsConfig
+
 from dynamic_reconfigure.server import Server
 
 # PID Constants
@@ -17,10 +20,10 @@ pid_values = {
     "Kd": 0.0798
 }
 
-motor_duty = {
-    "mL": 0,
-    "mR": 0
-}
+lock = threading.Lock()
+
+motor_left_speed = 0
+motor_right_speed = 0
 
 spins = []
 
@@ -36,6 +39,9 @@ driver = MotorDriver(1, 0x10)
 
 l = driver.detect()
 rospy.loginfo("Board list conform: %s", l)
+
+# Start Node
+rospy.init_node("driver_node")
 
 
 def print_board_status():
@@ -65,41 +71,47 @@ def reconfigure_callback(config, level):
 
 
 def set_motor_duty(message):
-    motor_duty["mL"] = message.dutyL
-    motor_duty["mR"] = message.dutyR
+    global motor_left_speed
+    global motor_right_speed
+    global spins
 
-    if motor_duty["mL"] > 0:
-        spins.append(MotorDriver.CCW)
-    elif motor_duty["mL"] < 0:
+    rospy.loginfo("%d %d", message.speedL, message.speedR)
+
+    lock.acquire()
+    spins = []
+    if message.speedL > 0:
+        motor_left_speed = (message.speedL / 160) * 100
         spins.append(MotorDriver.CW)
+    elif message.speedL < 0:
+        motor_left_speed = (-message.speedL / 160) * 100
+        spins.append(MotorDriver.CCW)
     else:
+        motor_left_speed = 0
         spins.append(MotorDriver.STOP)
 
-    if motor_duty["mR"] > 0:
+    if message.speedR > 0:
+        motor_right_speed = (message.speedR / 160) * 100
         spins.append(MotorDriver.CW)
-    elif motor_duty["mR"] < 0:
+    elif message.speedR < 0:
+        motor_right_speed = (-message.speedR / 160) * 100
         spins.append(MotorDriver.CCW)
     else:
+        motor_right_speed = 0
         spins.append(MotorDriver.STOP)
-
-    rospy.loginfo("%s %s", motor_duty, spins)
+    lock.release()
 
 
 def on_shutdown():
     driver.motor_stop(MotorDriver.ALL)
+    rospy.loginfo("Bye Bye!!!")
 
-
-# Start Node
-rospy.init_node("driver_node")
 
 # Create Reconfigure Configure Server
 server = Server(PIDLimitsConfig, reconfigure_callback)
 
 # Create set motor speed service
-rospy.Subscriber(ns + "drivers/set_motor_duty", Duty, set_motor_duty)
-speedPublisher = rospy.Publisher(ns + "drivers/get_motor_speed", Speed, queue_size=1)
-
-rate = rospy.Rate(15)
+rospy.Subscriber(ns + "drivers/set_motor_speed", Speed, callback=set_motor_duty)
+speedPublisher = rospy.Publisher(ns + "drivers/get_motor_speed", Speed, queue_size=10, latch=True)
 
 rospy.on_shutdown(on_shutdown)
 
@@ -111,32 +123,25 @@ while driver.begin() != MotorDriver.STA_OK:    # Board begin and check board sta
     time.sleep(2)
 rospy.loginfo("board begin success")
 
-time.sleep(2)
-
-rospy.loginfo("Motor encoder is being enabled")
-
 driver.set_encoder_enable(MotorDriver.ALL)
-
-time.sleep(2)
-
-rospy.loginfo("Setting motor reduction ratio")
 
 driver.set_encoder_reduction_ratio(MotorDriver.ALL, 60)
 
-time.sleep(2)
-
-rospy.loginfo("Setting PWM frequency")
-
 driver.set_motor_pwm_frequency(1000)
-
-time.sleep(2)
 
 speeds = driver.get_encoder_speed(MotorDriver.ALL)
 
 speedPublisher.publish(Speed(speedL=speeds[0], speedR=speeds[1]))
 
+rospy.loginfo("Starting main loop...")
+
+rate = rospy.Rate(24)
+
 while not rospy.is_shutdown():
-    driver.motor_movement(MotorDriver.ALL, spins, [motor_duty["mL"], motor_duty["mR"]])
+    lock.acquire()
+    # TODO: SETUP PID
+    driver.motor_movement(MotorDriver.ALL, spins, [motor_left_speed, motor_right_speed])
+    lock.release()
 
     speeds = driver.get_encoder_speed(MotorDriver.ALL)
 
