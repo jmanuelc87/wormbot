@@ -71,10 +71,6 @@ def reconfigure_callback(config, level):
 
 
 def set_motor_speed(message):
-    global motor_left_speed
-    global motor_right_speed
-    global spins
-
     rospy.loginfo("%s", message)
 
     lock.acquire()
