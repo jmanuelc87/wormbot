@@ -1,2 +1,2 @@
-int8 speedL
-int8 speedR
+float32 speedL
+float32 speedR
