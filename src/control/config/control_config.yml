@@ -1,0 +1,46 @@
+wormbot:
+
+  movement_controller:
+    type: "diff_drive_controller/DiffDriveController"
+    left_wheel: [ "left_wheel" ]
+    right_wheel: [ "right_wheel" ]
+    publish_rate: 30
+
+    cmd_vel_timeout: 0.25
+
+    velocity_rolling_window_size: 10
+
+    # Odometry covariances for the encoder output of the robot. These values should
+    # be tuned to your robot's sample odometry data, but these values are a good place
+    # to start
+    pose_covariance_diagonal: [ 0.001, 0.001, 0.001, 0.001, 0.001, 0.03 ]
+    twist_covariance_diagonal: [ 0.001, 0.001, 0.001, 0.001, 0.001, 0.03 ]
+
+    publish_cmd: false
+
+    # Odometry fused with IMU is published by robot_localization, so
+    # no need to publish a TF based on encoders alone.
+    enable_odom_tf: false
+
+    # Jetbot hardware does not provides wheel velocities
+    # estimate_velocity_from_position: true
+
+    # Wheel separation and radius multipliers
+    wheel_separation: 0.19
+    wheel_radius: 0.021
+    # wheel_separation_multiplier: 1.0 # default: 1.0
+    # wheel_radius_multiplier    : 1.0 # default: 1.0
+
+    # Velocity and acceleration limits for the robot
+    linear:
+      x:
+        has_velocity_limits: true
+        max_velocity: 0.353 # m/s
+        has_acceleration_limits: false
+        max_acceleration: 0.0 # m/s^2
+    angular:
+      z:
+        has_velocity_limits: true
+        max_velocity: 3.53 # rad/s
+        has_acceleration_limits: false
+        max_acceleration: 0.0 # rad/s^2

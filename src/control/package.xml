@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<package format="2">
+    <name>control</name>
+    <version>0.0.0</version>
+    <description>Control package for wormbot</description>
+
+    <maintainer email="jm.carb@gmail.com">jmanuelc87</maintainer>
+
+
+    <license>GPLv3</license>
+
+
+    <buildtool_depend>catkin</buildtool_depend>
+    <depend>roscpp</depend>
+    <depend>drivers</depend>
+    <depend>controller_manager</depend>
+
+    <depend>std_msgs</depend>
+
+    <export>
+    </export>
+</package>

@@ -4,35 +4,18 @@ import rospy
 import threading
 
 
-from simple_pid import PID
-
 from board import MotorDriverI2C as MotorDriver
 
 from drivers.msg import Speed
-from drivers.cfg import PIDLimitsConfig
 
-from dynamic_reconfigure.server import Server
-
-# PID Constants
-pid_values = {
-    "Kp": 0.3522,
-    "Ki": 0.2317,
-    "Kd": 0.0798
-}
 
 lock = threading.Lock()
 
 motor_left_speed = 0
 motor_right_speed = 0
 
-spins = []
-
 # Namespace
 ns = rospy.get_namespace()
-
-# PID Object
-pidL = PID(Kp=pid_values["Kp"], Ki=pid_values["Ki"], Kd=pid_values["Kd"])
-pidR = PID(Kp=pid_values["Kp"], Ki=pid_values["Ki"], Kd=pid_values["Kd"])
 
 # motor driver
 driver = MotorDriver(1, 0x10)
@@ -57,48 +40,14 @@ def print_board_status():
         rospy.logdebug("driver status: unsupport driver framware version")
 
 
-def reconfigure_callback(config, level):
-    pidL.Kp = config.Kp
-    pidL.Ki = config.Ki
-    pidL.Kd = config.Kd
-    pidL.auto_mode = config.enable
-    pidR.Kp = config.Kp
-    pidR.Ki = config.Ki
-    pidR.Kd = config.Kd
-    pidR.auto_mode = config.enable
-    # TODO: plot values
-    return config
-
-
 def set_motor_speed(message):
     global motor_left_speed
     global motor_right_speed
-    global spins
 
     lock.acquire()
-    spins = []
-    if message.speedL > 0:
-        motor_left_speed = (message.speedL / 160) * 100
-        spins.append(MotorDriver.CW)
-    elif message.speedL < 0:
-        motor_left_speed = (-message.speedL / 160) * 100
-        spins.append(MotorDriver.CCW)
-    else:
-        motor_left_speed = 0
-        spins.append(MotorDriver.STOP)
-
-    if message.speedR > 0:
-        motor_right_speed = (message.speedR / 160) * 100
-        spins.append(MotorDriver.CCW)
-    elif message.speedR < 0:
-        motor_right_speed = (-message.speedR / 160) * 100
-        spins.append(MotorDriver.CW)
-    else:
-        motor_right_speed = 0
-        spins.append(MotorDriver.STOP)
+    motor_left_speed = message.speedL;
+    motor_right_speed = message.speedR;
     lock.release()
-
-    rospy.logdebug("Speed %s, %s, Spin: %s", motor_left_speed, motor_right_speed, spins)
 
 
 def on_shutdown():
@@ -106,12 +55,9 @@ def on_shutdown():
     rospy.loginfo("Bye Bye!!!")
 
 
-# Create Reconfigure Configure Server
-server = Server(PIDLimitsConfig, reconfigure_callback)
-
 # Create set motor speed service
 rospy.Subscriber(ns + "drivers/set_motor_speed", Speed, callback=set_motor_speed)
-speedPublisher = rospy.Publisher(ns + "drivers/get_motor_speed", Speed, queue_size=10, latch=True)
+get_motor_speed = rospy.Publisher(ns + "drivers/get_motor_speed", Speed, queue_size=10, latch=True)
 
 rospy.on_shutdown(on_shutdown)
 
@@ -131,24 +77,32 @@ driver.set_motor_pwm_frequency(1000)
 
 speeds = driver.get_encoder_speed(MotorDriver.ALL)
 
-speedPublisher.publish(Speed(speedL=speeds[0], speedR=speeds[1]))
+get_motor_speed.publish(Speed(speedL=speeds[0], speedR=speeds[1]))
 
 rospy.loginfo("Starting main loop...")
 
-rate = rospy.Rate(24)
+rate = rospy.Rate(30)
 
 while not rospy.is_shutdown():
+
     lock.acquire()
-    # TODO: SETUP PID
-    for p in zip([MotorDriver.M1, MotorDriver.M2], spins, [motor_left_speed, motor_right_speed]):
-        if p[1] == MotorDriver.STOP:
-            driver.motor_stop([p[0]])
-        else:
-            driver.motor_movement([p[0]], p[1], p[2])
+    if motor_left_speed > 0:
+        driver.motor_movement([MotorDriver.M1], MotorDriver.CW, (motor_left_speed / 160) * 100)
+    elif motor_left_speed < 0:
+        driver.motor_movement([MotorDriver.M1], MotorDriver.CCW, (-motor_left_speed / 160) * 100)
+    else:
+        driver.motor_stop([MotorDriver.M1])
+
+    if motor_right_speed > 0:
+        driver.motor_movement([MotorDriver.M2], MotorDriver.CCW, (motor_right_speed / 160) * 100)
+    elif motor_right_speed < 0:
+        driver.motor_movement([MotorDriver.M2], MotorDriver.CW, (-motor_right_speed / 160) * 100)
+    else:
+        driver.motor_stop([MotorDriver.M2])
     lock.release()
 
     speeds = driver.get_encoder_speed(MotorDriver.ALL)
 
-    speedPublisher.publish(Speed(speedL=speeds[0], speedR=speeds[1]))
+    get_motor_speed.publish(Speed(speedL=speeds[0], speedR=speeds[1]))
 
     rate.sleep()

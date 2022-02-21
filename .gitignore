@@ -1,4 +1,5 @@
 devel/
+install/
 logs/
 build/
 bin/
@@ -53,3 +54,4 @@ CATKIN_IGNORE
 # Intellij
 .idea
 .vscode
+.vs
