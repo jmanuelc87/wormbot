@@ -1,10 +1,12 @@
 #ifndef CONTROL_HW_INTERFACE_HPP
 #define CONTROL_HW_INTERFACE_HPP
 
+#include <math.h>
 #include <string>
 #include <ros/console.h>
 
-#include "drivers/Speed.h"
+#include "drivers/SpeedMessage.h"
+#include "drivers/SpeedCommand.h"
 
 #include "hardware_interface/robot_hw.h"
 #include "hardware_interface/joint_state_interface.h"
@@ -18,17 +20,19 @@ namespace control_hw_interface
     class ControlHWInterface : public RobotHW
     {
     private:
-        JointStateInterface jnt_state_interface;
-        VelocityJointInterface jnt_velocity_interface;
-        PositionJointInterface jnt_position_interface;
+        double left_wheel_velocity_cmd;
+        double right_wheel_velocity_cmd;
 
-        double cmd[2];
-        double pos[2];
-        double vel[2];
-        double eff[2];
+        double left_wheel_position_state;
+        double right_wheel_position_state;
 
-        ros::Publisher speed_publisher;
-        ros::Subscriber speed_subscriber;
+        double left_wheel_velocity_state;
+        double right_wheel_velocity_state;
+
+        double wheel_radius;
+
+        ros::Publisher set_motor_speed;
+        ros::ServiceClient get_motor_speed;
 
     public:
         ControlHWInterface();
@@ -36,7 +40,7 @@ namespace control_hw_interface
 
         bool init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh);
 
-        bool read();
+        bool read(ros::Time timestamp, ros::Duration period);
 
         bool write();
     };

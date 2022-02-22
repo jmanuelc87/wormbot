@@ -31,7 +31,7 @@ int main(int argc, char* argv[])
 	{
 		period = ros::Time::now() - timestamp;
 
-		hw.read();
+		hw.read(timestamp, period);
 
 		manager.update(timestamp, period);
 

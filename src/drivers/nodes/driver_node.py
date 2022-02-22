@@ -6,7 +6,8 @@ import threading
 
 from board import MotorDriverI2C as MotorDriver
 
-from drivers.msg import Speed
+from drivers.msg import SpeedMessage
+from drivers.srv import SpeedCommand
 
 
 lock = threading.Lock()
@@ -50,14 +51,24 @@ def set_motor_speed(message):
     lock.release()
 
 
+def get_motor_speed(req):
+    speeds = driver.get_encoder_speed(MotorDriver.ALL)
+
+    res = SpeedCommand()
+    res.speedL = speeds[0]
+    res.speedR = speeds[1]
+
+    return res
+
+
 def on_shutdown():
     driver.motor_stop(MotorDriver.ALL)
     rospy.loginfo("Bye Bye!!!")
 
 
 # Create set motor speed service
-rospy.Subscriber(ns + "drivers/set_motor_speed", Speed, callback=set_motor_speed)
-get_motor_speed = rospy.Publisher(ns + "drivers/get_motor_speed", Speed, queue_size=10, latch=True)
+rospy.Subscriber(ns + "drivers/set_motor_speed", SpeedMessage, callback=set_motor_speed)
+rospy.Service(ns + "drivers/get_motor_speed", SpeedCommand, get_motor_speed)
 
 rospy.on_shutdown(on_shutdown)
 
@@ -100,9 +111,5 @@ while not rospy.is_shutdown():
     else:
         driver.motor_stop([MotorDriver.M2])
     lock.release()
-
-    speeds = driver.get_encoder_speed(MotorDriver.ALL)
-
-    get_motor_speed.publish(Speed(speedL=speeds[0], speedR=speeds[1]))
 
     rate.sleep()

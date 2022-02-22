@@ -6,18 +6,22 @@ control_hw_interface::ControlHWInterface::~ControlHWInterface() {}
 
 bool control_hw_interface::ControlHWInterface::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh) {
 
-    JointStateHandle state_handle_lt("left_wheel", &pos[0], &vel[0], &eff[0]);
+    JointStateInterface jnt_state_interface;
+
+    JointStateHandle state_handle_lt("left_wheel", &left_wheel_position_state, &left_wheel_velocity_state, nullptr);
     jnt_state_interface.registerHandle(state_handle_lt);
 
-    JointStateHandle state_handle_rt("right_wheel", &pos[1], &vel[1], &eff[1]);
+    JointStateHandle state_handle_rt("right_wheel", &right_wheel_position_state, &right_wheel_velocity_state, nullptr);
     jnt_state_interface.registerHandle(state_handle_rt);
 
     registerInterface(&jnt_state_interface);
 
-    JointHandle vel_handle_lt(jnt_state_interface.getHandle("left_wheel"), &cmd[0]);
+    VelocityJointInterface jnt_velocity_interface;
+
+    JointHandle vel_handle_lt(jnt_state_interface.getHandle("left_wheel"), &left_wheel_velocity_cmd);
     jnt_velocity_interface.registerHandle(vel_handle_lt);
 
-    JointHandle vel_handle_rt(jnt_state_interface.getHandle("right_wheel"), &cmd[1]);
+    JointHandle vel_handle_rt(jnt_state_interface.getHandle("right_wheel"), &right_wheel_velocity_cmd);
     jnt_velocity_interface.registerHandle(vel_handle_rt);
 
     registerInterface(&jnt_velocity_interface);
@@ -25,31 +29,64 @@ bool control_hw_interface::ControlHWInterface::init(ros::NodeHandle& root_nh, ro
     std::string topic1 = root_nh.getNamespace() + "/drivers/set_motor_speed";
     std::string topic2 = root_nh.getNamespace() + "/drivers/get_motor_speed";
 
-    speed_publisher = root_nh.advertise<drivers::Speed>(topic1, 10);
+    set_motor_speed = root_nh.advertise<drivers::SpeedMessage>(topic1, 10);
+
+    try
+    {
+        get_motor_speed = root_nh.serviceClient<drivers::SpeedCommand>(topic2);
+    }
+    catch (const std::exception&)
+    {
+        ROS_ERROR("Error while connecting to the service");
+    }
+
+    root_nh.getParam("/wormbot/movement_controller/wheel_radius", wheel_radius);
 
     return true;
 }
 
-bool control_hw_interface::ControlHWInterface::read()
+bool control_hw_interface::ControlHWInterface::read(ros::Time timestamp, ros::Duration period)
 {
-    // read from ros topic
-    return true;
+    drivers::SpeedCommand srv;
+
+    if (get_motor_speed.call(srv)) {
+        const float left_wheel_rpm = srv.response.speedL;
+        const float right_wheel_rpm = srv.response.speedR;
+
+        const float left_wheel_rads = left_wheel_rpm * ((2 * M_PI) / 60);
+        const float right_wheel_rads = right_wheel_rpm * ((2 * M_PI) / 60);
+
+        const float left_wheel_linear = left_wheel_rads * wheel_radius;
+        const float right_wheel_linear = right_wheel_rads * wheel_radius;
+
+        left_wheel_position_state = left_wheel_linear * period.toSec();
+        right_wheel_position_state = right_wheel_linear * period.toSec();
+
+        left_wheel_velocity_state = left_wheel_rads;
+        right_wheel_velocity_state = right_wheel_rads;
+
+        return true;
+    }
+    else {
+        ROS_ERROR_THROTTLE(360, "Failed to call the service get_motor_speed");
+        return false;
+    }
 }
 
-bool control_hw_interface::ControlHWInterface::write() {
+bool control_hw_interface::ControlHWInterface::write()
+{
+    // conversion from rad/s to rpm
+    double left_speed = round(left_wheel_velocity_cmd * (60 / (2 * M_PI)));
 
-    double left_speed = jnt_velocity_interface.getHandle("left_wheel").getCommand();
-
-    double right_speed = jnt_velocity_interface.getHandle("right_wheel").getCommand();
+    double right_speed = round(right_wheel_velocity_cmd * (60 / (2 * M_PI)));
 
     ROS_INFO_THROTTLE(60, "%f, %f", left_speed, right_speed);
 
-    drivers::Speed msg;
+    drivers::SpeedMessage msg;
     msg.speedL = left_speed;
     msg.speedR = right_speed;
 
-    speed_publisher.publish(msg);
-
+    set_motor_speed.publish(msg);
 
     return true;
 }

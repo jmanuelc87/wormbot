@@ -49,13 +49,14 @@ catkin_python_setup()
 ## Generate messages in the 'msg' folder
 add_message_files(
   FILES
-  Speed.msg
+  SpeedMessage.msg
 )
 
 ## Generate services in the 'srv' folder
-# add_service_files(
-#  FILES
-# )
+add_service_files(
+ FILES
+ SpeedCommand.srv
+)
 
 ## Generate actions in the 'action' folder
 # add_action_files(
