@@ -7,7 +7,7 @@ import threading
 from board import MotorDriverI2C as MotorDriver
 
 from drivers.msg import SpeedMessage
-from drivers.srv import SpeedCommand
+from drivers.srv import SpeedCommandResponse
 
 
 lock = threading.Lock()
@@ -54,7 +54,7 @@ def set_motor_speed(message):
 def get_motor_speed(req):
     speeds = driver.get_encoder_speed(MotorDriver.ALL)
 
-    res = SpeedCommand()
+    res = SpeedCommandResponse()
     res.speedL = speeds[0]
     res.speedR = speeds[1]
 
