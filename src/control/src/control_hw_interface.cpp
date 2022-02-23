@@ -6,8 +6,6 @@ control_hw_interface::ControlHWInterface::~ControlHWInterface() {}
 
 bool control_hw_interface::ControlHWInterface::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh) {
 
-    JointStateInterface jnt_state_interface;
-
     JointStateHandle state_handle_lt("left_wheel", &left_wheel_position_state, &left_wheel_velocity_state, &left_effort);
     jnt_state_interface.registerHandle(state_handle_lt);
 
@@ -15,8 +13,6 @@ bool control_hw_interface::ControlHWInterface::init(ros::NodeHandle& root_nh, ro
     jnt_state_interface.registerHandle(state_handle_rt);
 
     registerInterface(&jnt_state_interface);
-
-    VelocityJointInterface jnt_velocity_interface;
 
     JointHandle vel_handle_lt(jnt_state_interface.getHandle("left_wheel"), &left_wheel_velocity_cmd);
     jnt_velocity_interface.registerHandle(vel_handle_lt);
@@ -43,7 +39,7 @@ bool control_hw_interface::ControlHWInterface::init(ros::NodeHandle& root_nh, ro
 
 bool control_hw_interface::ControlHWInterface::read(ros::Time timestamp, ros::Duration period)
 {
-    drivers::SpeedCommand srv;
+   drivers::SpeedCommand srv;
 
     srv.request.driver = 1;
 
@@ -71,6 +67,8 @@ bool control_hw_interface::ControlHWInterface::read(ros::Time timestamp, ros::Du
         ROS_ERROR_THROTTLE(360, "Failed to call the service get_motor_speed");
         return false;
     }
+
+    return true;
 }
 
 bool control_hw_interface::ControlHWInterface::write()

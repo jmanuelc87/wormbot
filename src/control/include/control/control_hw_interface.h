@@ -20,6 +20,9 @@ namespace control_hw_interface
     class ControlHWInterface : public RobotHW
     {
     private:
+        JointStateInterface jnt_state_interface;
+        VelocityJointInterface jnt_velocity_interface;
+
         double left_wheel_velocity_cmd = 0;
         double right_wheel_velocity_cmd = 0;
 

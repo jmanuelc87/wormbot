@@ -5,4 +5,6 @@
   <node pkg="controller_manager" type="spawner" name="spawner" ns="/wormbot" args="/wormbot/movement_controller" output="screen" />
 
   <node pkg="control" type="control_node" name="control_node" ns="/wormbot" output="screen" />
+
+  <include file="$(find drivers)/launch/main.launch" />
 </launch>
