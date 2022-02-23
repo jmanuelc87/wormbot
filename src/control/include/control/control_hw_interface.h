@@ -29,6 +29,9 @@ namespace control_hw_interface
         double left_wheel_velocity_state = 0;
         double right_wheel_velocity_state = 0;
 
+        double left_effort = 0;
+        double right_effort = 0;
+
         double wheel_radius = 0;
 
         ros::Publisher set_motor_speed;

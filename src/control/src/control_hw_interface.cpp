@@ -8,10 +8,10 @@ bool control_hw_interface::ControlHWInterface::init(ros::NodeHandle& root_nh, ro
 
     JointStateInterface jnt_state_interface;
 
-    JointStateHandle state_handle_lt("left_wheel", &left_wheel_position_state, &left_wheel_velocity_state, nullptr);
+    JointStateHandle state_handle_lt("left_wheel", &left_wheel_position_state, &left_wheel_velocity_state, &left_effort);
     jnt_state_interface.registerHandle(state_handle_lt);
 
-    JointStateHandle state_handle_rt("right_wheel", &right_wheel_position_state, &right_wheel_velocity_state, nullptr);
+    JointStateHandle state_handle_rt("right_wheel", &right_wheel_position_state, &right_wheel_velocity_state, &right_effort);
     jnt_state_interface.registerHandle(state_handle_rt);
 
     registerInterface(&jnt_state_interface);
