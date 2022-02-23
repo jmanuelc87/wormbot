@@ -86,10 +86,6 @@ driver.set_encoder_reduction_ratio(MotorDriver.ALL, 60)
 
 driver.set_motor_pwm_frequency(1000)
 
-speeds = driver.get_encoder_speed(MotorDriver.ALL)
-
-get_motor_speed.publish(Speed(speedL=speeds[0], speedR=speeds[1]))
-
 rospy.loginfo("Starting main loop...")
 
 rate = rospy.Rate(30)
