@@ -1,8 +1,6 @@
 <?xml version="1.0"?>
 <launch>
   <rosparam file="$(find control)/config/control_config.yml" command="load" />
-
-  <node pkg="drivers" type="driver_node.py" name="driver_node" ns="/wormbot" output="screen"/>
   
   <node pkg="controller_manager" type="spawner" name="base_control_manager" ns="/wormbot" args="/wormbot/movement_controller" output="screen" />
 
