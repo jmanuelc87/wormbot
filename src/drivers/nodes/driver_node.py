@@ -7,7 +7,7 @@ import threading
 from board import MotorDriverI2C as MotorDriver
 
 from drivers.msg import SpeedMessage
-from drivers.srv import SpeedCommandResponse
+from drivers.srv import SpeedCommand, SpeedCommandResponse
 
 
 lock = threading.Lock()
