@@ -1,7 +1,7 @@
 wormbot:
 
   movement_controller:
-    type: "diff_drive_controller/DiffDriveController"
+    type: diff_drive_controller/DiffDriveController
     left_wheel: [ "left_wheel" ]
     right_wheel: [ "right_wheel" ]
     publish_rate: 30

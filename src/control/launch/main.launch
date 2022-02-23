@@ -2,7 +2,7 @@
 <launch>
   <rosparam file="$(find control)/config/control_config.yml" command="load" />
   
-  <node pkg="controller_manager" type="spawner" name="spawner" args="/wormbot/movement_controller" output="screen" />
+  <node pkg="controller_manager" type="spawner" name="spawner" ns="/wormbot" args="/wormbot/movement_controller" output="screen" />
 
   <node pkg="control" type="control_node" name="control_node" ns="/wormbot" output="screen" />
 </launch>

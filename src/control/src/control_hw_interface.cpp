@@ -36,12 +36,16 @@ bool control_hw_interface::ControlHWInterface::init(ros::NodeHandle& root_nh, ro
 
     root_nh.getParam("/wormbot/movement_controller/wheel_radius", wheel_radius);
 
+    ROS_INFO("Radius %f", wheel_radius);
+
     return true;
 }
 
 bool control_hw_interface::ControlHWInterface::read(ros::Time timestamp, ros::Duration period)
 {
     drivers::SpeedCommand srv;
+
+    srv.request.driver = 1;
 
     if (get_motor_speed.call(srv)) {
         const float left_wheel_rpm = srv.response.speedL;
@@ -76,7 +80,7 @@ bool control_hw_interface::ControlHWInterface::write()
 
     double right_speed = round(right_wheel_velocity_cmd * (60 / (2 * M_PI)));
 
-    ROS_INFO_THROTTLE(60, "%0.2f, %0.2f", left_speed, right_speed);
+    ROS_DEBUG_THROTTLE_NAMED(120, "write", "%0.2f, %0.2f", left_speed, right_speed);
 
     drivers::SpeedMessage msg;
     msg.speedL = left_speed;
