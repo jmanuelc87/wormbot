@@ -1,7 +1,5 @@
 <?xml version="1.0"?>
 <launch>
-  <include file="$(find drivers)/launch/main.launch" />
-
   <rosparam file="$(find control)/config/control_config.yml" command="load" />
   
   <node pkg="controller_manager" type="spawner" name="base_control_manager" ns="/wormbot" args="/wormbot/movement_controller" output="screen" />
