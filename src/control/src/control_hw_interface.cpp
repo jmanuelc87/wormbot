@@ -29,6 +29,8 @@ bool control_hw_interface::ControlHWInterface::init(ros::NodeHandle& root_nh, ro
     std::string topic1 = root_nh.getNamespace() + "/drivers/set_motor_speed";
     std::string topic2 = root_nh.getNamespace() + "/drivers/get_motor_speed";
 
+    ROS_INFO("%s %s", topic1.c_str(), topic2.c_str());
+
     set_motor_speed = root_nh.advertise<drivers::SpeedMessage>(topic1, 10);
     get_motor_speed = root_nh.serviceClient<drivers::SpeedCommand>(topic2);
 
