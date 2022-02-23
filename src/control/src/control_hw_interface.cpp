@@ -30,15 +30,7 @@ bool control_hw_interface::ControlHWInterface::init(ros::NodeHandle& root_nh, ro
     std::string topic2 = root_nh.getNamespace() + "/drivers/get_motor_speed";
 
     set_motor_speed = root_nh.advertise<drivers::SpeedMessage>(topic1, 10);
-
-    try
-    {
-        get_motor_speed = root_nh.serviceClient<drivers::SpeedCommand>(topic2);
-    }
-    catch (const std::exception&)
-    {
-        ROS_ERROR("Error while connecting to the service");
-    }
+    get_motor_speed = root_nh.serviceClient<drivers::SpeedCommand>(topic2);
 
     root_nh.getParam("/wormbot/movement_controller/wheel_radius", wheel_radius);
 
@@ -53,17 +45,19 @@ bool control_hw_interface::ControlHWInterface::read(ros::Time timestamp, ros::Du
         const float left_wheel_rpm = srv.response.speedL;
         const float right_wheel_rpm = srv.response.speedR;
 
-        const float left_wheel_rads = left_wheel_rpm * ((2 * M_PI) / 60);
-        const float right_wheel_rads = right_wheel_rpm * ((2 * M_PI) / 60);
+        const double left_wheel_rads = left_wheel_rpm * ((2 * M_PI) / 60);
+        const double right_wheel_rads = right_wheel_rpm * ((2 * M_PI) / 60);
 
-        const float left_wheel_linear = left_wheel_rads * wheel_radius;
-        const float right_wheel_linear = right_wheel_rads * wheel_radius;
+        const double left_wheel_linear = left_wheel_rads * wheel_radius;
+        const double right_wheel_linear = right_wheel_rads * wheel_radius;
 
         left_wheel_position_state = left_wheel_linear * period.toSec();
         right_wheel_position_state = right_wheel_linear * period.toSec();
 
         left_wheel_velocity_state = left_wheel_rads;
         right_wheel_velocity_state = right_wheel_rads;
+
+        ROS_DEBUG_THROTTLE_NAMED(120, "read", "%0.2f, %0.2f, %0.2f, %0.2f", left_wheel_position_state, left_wheel_velocity_state, right_wheel_position_state, right_wheel_velocity_state);
 
         return true;
     }
@@ -80,7 +74,7 @@ bool control_hw_interface::ControlHWInterface::write()
 
     double right_speed = round(right_wheel_velocity_cmd * (60 / (2 * M_PI)));
 
-    ROS_INFO_THROTTLE(60, "%f, %f", left_speed, right_speed);
+    ROS_INFO_THROTTLE(60, "%0.2f, %0.2f", left_speed, right_speed);
 
     drivers::SpeedMessage msg;
     msg.speedL = left_speed;

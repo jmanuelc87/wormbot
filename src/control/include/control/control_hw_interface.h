@@ -20,16 +20,16 @@ namespace control_hw_interface
     class ControlHWInterface : public RobotHW
     {
     private:
-        double left_wheel_velocity_cmd;
-        double right_wheel_velocity_cmd;
+        double left_wheel_velocity_cmd = 0;
+        double right_wheel_velocity_cmd = 0;
 
-        double left_wheel_position_state;
-        double right_wheel_position_state;
+        double left_wheel_position_state = 0;
+        double right_wheel_position_state = 0;
 
-        double left_wheel_velocity_state;
-        double right_wheel_velocity_state;
+        double left_wheel_velocity_state = 0;
+        double right_wheel_velocity_state = 0;
 
-        double wheel_radius;
+        double wheel_radius = 0;
 
         ros::Publisher set_motor_speed;
         ros::ServiceClient get_motor_speed;
