@@ -59,7 +59,7 @@ bool control_hw_interface::ControlHWInterface::read(ros::Time timestamp, ros::Du
         left_wheel_velocity_state = left_wheel_rads;
         right_wheel_velocity_state = right_wheel_rads;
 
-        ROS_DEBUG_THROTTLE_NAMED(120, "read", "%0.2f, %0.2f, %0.2f, %0.2f", left_wheel_position_state, left_wheel_velocity_state, right_wheel_position_state, right_wheel_velocity_state);
+        ROS_INFO_THROTTLE_NAMED(120, "read", "%0.2f, %0.2f, %0.2f, %0.2f", left_wheel_position_state, left_wheel_velocity_state, right_wheel_position_state, right_wheel_velocity_state);
 
         return true;
     }
@@ -78,7 +78,7 @@ bool control_hw_interface::ControlHWInterface::write()
 
     double right_speed = round(right_wheel_velocity_cmd * (60 / (2 * M_PI)));
 
-    ROS_DEBUG_THROTTLE_NAMED(120, "write", "%0.2f, %0.2f", left_speed, right_speed);
+    ROS_INFO_THROTTLE_NAMED(120, "write", "%0.2f, %0.2f", left_speed, right_speed);
 
     drivers::SpeedMessage msg;
     msg.speedL = left_speed;
