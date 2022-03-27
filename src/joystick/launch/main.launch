@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<launch>
+    <arg name="debug" default="false" />
+
+    <rosparam file="$(find joystick)/config/joy_params.yml" command="load" />
+
+    <node name="joy_controller" pkg="joy" type="joy_node" output="screen" ns="/walleye" />
+
+    <node name="joystick_node" pkg="joystick" type="joystick_node.py" ns="/walleye" output="screen"/>
+
+    <group if="$(arg debug)">
+        <node name="jetbot_rqt_gui" pkg="rqt_gui" type="rqt_gui" output="screen"/>
+    </group>
+</launch>

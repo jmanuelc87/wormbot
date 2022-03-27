@@ -74,9 +74,9 @@ bool control_hw_interface::ControlHWInterface::read(ros::Time timestamp, ros::Du
 bool control_hw_interface::ControlHWInterface::write()
 {
     // conversion from rad/s to rpm
-    double left_speed = round(left_wheel_velocity_cmd * (60 / (2 * M_PI)));
+    double left_speed = left_wheel_velocity_cmd * (60 / (2 * M_PI));
 
-    double right_speed = round(right_wheel_velocity_cmd * (60 / (2 * M_PI)));
+    double right_speed = right_wheel_velocity_cmd * (60 / (2 * M_PI));
 
     ROS_INFO_THROTTLE_NAMED(120, "write", "%0.2f, %0.2f", left_speed, right_speed);
 

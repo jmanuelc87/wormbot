@@ -4,9 +4,9 @@ wormbot:
     type: diff_drive_controller/DiffDriveController
     left_wheel: [ "left_wheel" ]
     right_wheel: [ "right_wheel" ]
-    publish_rate: 30
+    publish_rate: 50
 
-    cmd_vel_timeout: 0.25
+    cmd_vel_timeout: 0.5
 
     velocity_rolling_window_size: 10
 
@@ -36,11 +36,17 @@ wormbot:
       x:
         has_velocity_limits: true
         max_velocity: 0.80 # m/s
-        has_acceleration_limits: false
-        max_acceleration: 0.0 # m/s^2
+        has_acceleration_limits: true
+        max_acceleration: 1.0 # m/s^2
+        min_acceleration: -0.4
+        has_jerk_limits: true
+        max_jerk: 15.0
     angular:
       z:
         has_velocity_limits: true
         max_velocity: 8.0 # rad/s
-        has_acceleration_limits: false
-        max_acceleration: 0.0 # rad/s^2
+        has_acceleration_limits: true
+        max_acceleration: 7.02 # rad/s^2
+        min_acceleration: -3.02
+        has_jerk_limits: true
+        max_jerk: 2.5
