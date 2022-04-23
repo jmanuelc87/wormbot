@@ -1,9 +1,9 @@
-from logging import lastResort
 import rospy
 
 from enum import Enum
 from joystick import Listener
 from sensor_msgs.msg import Joy
+from geometry_msgs.msg import Twist
 from joystick import AxisListener, EventListener
 
 
@@ -12,21 +12,25 @@ LOW = 0.0
 
 
 class ControlDefinition(Enum):
-    LEFT_AXIS = (0, 1),
-    RIGHT_AXIS = (2, 5),
+    LEFT_THUMB = (0, 1),
+    RIGHT_THUMB = (2, 3),
 
-    BUTTON_A = 0,
-    BUTTON_B = 1,
-    BUTTON_X = 2,
-    BUTTON_Y = 3
+    TRIGGERS = (4, 5),
+
+    BUTTON_A = 4,
+    BUTTON_B = 5,
+    BUTTON_X = 6,
+    BUTTON_Y = 7
 
 
 class Controller(object):
 
-    def __init__(self, topic):
-        self.subscriber = rospy.Subscriber(topic, Joy, callback=self.__control_subscriber, queue_size=10)
+    def __init__(self, topic, pub):
+        self.subscriber = rospy.Subscriber(topic, Joy, callback=self.__control_subscriber)
         self.listeners = {}
         self.current_seq = 0
+        self.pub = pub
+        self.message = Twist()
 
     def __del__(self):
         self.subscriber.unregister()
@@ -48,24 +52,30 @@ class Controller(object):
         y = message.axes[key.value[0][1]]
         
         if last_msg.axes[key.value[0][0]] != x or last_msg.axes[key.value[0][1]] != y:
-            curr_listener.onAxisMoveAction(x, y)
+            self.message = curr_listener.onAxisMoveAction(x, y)
 
     def __perform_event_listener(self, message, key):
         curr_listener = self.listeners[key][0]
         last_msg = self.listeners[key][1]
 
-        if last_msg.buttons[key.value] != message.buttons[key.value] and message.buttons[key.value] == HIGH:
-            curr_listener.onButtonDown()
+        if last_msg.buttons[key.value[0]] != message.buttons[key.value[0]] and message.buttons[key.value[0]] == HIGH:
+            self.message = curr_listener.onButtonDown()
             self.listeners[key][2] = True
 
-        if last_msg.buttons[key.value] != message.buttons[key.value] and message.buttons[key.value] == LOW:
-            curr_listener.onButtonUp()
+        if last_msg.buttons[key.value[0]] != message.buttons[key.value[0]] and message.buttons[key.value[0]] == LOW:
+            self.message = curr_listener.onButtonUp()
             self.listeners[key][3] = True
 
         if self.listeners[key][2] and self.listeners[key][3]:
-            curr_listener.onButtonPress()
+            self.message = curr_listener.onButtonPress()
             self.listeners[key][2] = False
             self.listeners[key][3] = False
+
+    def __publish(self):
+        if self.message != None:
+            self.pub.publish(self.message)
+        else:
+            self.pub.publish(Twist())
 
     def __control_subscriber(self, message):
         for key in self.listeners.keys():
@@ -81,3 +91,4 @@ class Controller(object):
                     raise RuntimeError("Not defined...")
 
             current_listener[1] = message
+        self.__publish()

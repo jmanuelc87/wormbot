@@ -1,8 +1,8 @@
-from abc import ABC, abstractmethod
+from abc import ABCMeta, abstractmethod
 
 
-class Listener(ABC):
-    pass
+class Listener:
+    __metaclass__ = ABCMeta
 
 
 class AxisListener(Listener):
