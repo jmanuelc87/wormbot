@@ -35,7 +35,7 @@ int main(int argc, char * argv[])
 
 	ros::Publisher pub = nh.advertise<sensor_msgs::Joy>(topic, 1);
 
-	ros::Rate loop(50);
+	ros::Rate loop(100);
 
 	while (ros::ok()) {
 
@@ -163,6 +163,9 @@ void updateTopic(ros::Publisher pub) {
 
 			joy.buttons.push_back(wButtons & XINPUT_GAMEPAD_START ? 1 : 0);
 			joy.buttons.push_back(wButtons & XINPUT_GAMEPAD_BACK ? 1 : 0);
+
+			joy.buttons.push_back(wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER ? 1 : 0);
+			joy.buttons.push_back(wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER ? 1 : 0);
 
 			pub.publish(joy);
 		}

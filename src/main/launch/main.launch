@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<launch>
+    <arg name="node"    default="workstation" />
+    <arg name="system"  default="$(env OS)" />
+
+    <group if="$(eval node == 'jetson')">
+        <include file="$(find drivers)/launch/main.launch" />
+        <include file="$(find control)/launch/main.launch" />
+    </group>
+
+    <group if="$(eval node == 'workstation')">
+        <include file="$(find joystick)/launch/main.launch" />
+    </group>
+</launch>

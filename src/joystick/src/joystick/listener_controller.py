@@ -17,20 +17,24 @@ class ControlDefinition(Enum):
 
     TRIGGERS = (4, 5),
 
+    LEFT_SHOULDER = 10,
+    RIGHT_SHOULDER = 11,
+
     BUTTON_A = 4,
     BUTTON_B = 5,
     BUTTON_X = 6,
     BUTTON_Y = 7
 
 
-class Controller(object):
+class ListenerController(object):
 
     def __init__(self, topic, pub):
-        self.subscriber = rospy.Subscriber(topic, Joy, callback=self.__control_subscriber)
+        self.subscriber = rospy.Subscriber(
+            topic, Joy, callback=self.__control_subscriber)
         self.listeners = {}
         self.current_seq = 0
         self.pub = pub
-        self.message = Twist()
+        self.message = None
 
     def __del__(self):
         self.subscriber.unregister()
@@ -50,30 +54,29 @@ class Controller(object):
         last_msg = self.listeners[key][1]
         x = message.axes[key.value[0][0]]
         y = message.axes[key.value[0][1]]
-        
-        if last_msg.axes[key.value[0][0]] != x or last_msg.axes[key.value[0][1]] != y:
-            self.message = curr_listener.onAxisMoveAction(x, y)
+
+        self.message = curr_listener.onAxisMoveAction(x, y)
 
     def __perform_event_listener(self, message, key):
         curr_listener = self.listeners[key][0]
         last_msg = self.listeners[key][1]
 
         if last_msg.buttons[key.value[0]] != message.buttons[key.value[0]] and message.buttons[key.value[0]] == HIGH:
-            self.message = curr_listener.onButtonDown()
+            curr_listener.onButtonDown()
             self.listeners[key][2] = True
 
         if last_msg.buttons[key.value[0]] != message.buttons[key.value[0]] and message.buttons[key.value[0]] == LOW:
-            self.message = curr_listener.onButtonUp()
+            curr_listener.onButtonUp()
             self.listeners[key][3] = True
 
         if self.listeners[key][2] and self.listeners[key][3]:
-            self.message = curr_listener.onButtonPress()
+            curr_listener.onButtonPress()
             self.listeners[key][2] = False
             self.listeners[key][3] = False
 
-    def __publish(self):
-        if self.message != None:
-            self.pub.publish(self.message)
+    def __publish(self, message):
+        if message:
+            self.pub.publish(message)
         else:
             self.pub.publish(Twist())
 
@@ -91,4 +94,5 @@ class Controller(object):
                     raise RuntimeError("Not defined...")
 
             current_listener[1] = message
-        self.__publish()
+
+        self.__publish(self.message)

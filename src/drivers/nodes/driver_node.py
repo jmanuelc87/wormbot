@@ -46,8 +46,8 @@ def set_motor_speed(message):
     global motor_right_speed
 
     lock.acquire()
-    motor_left_speed = message.speedL;
-    motor_right_speed = message.speedR;
+    motor_left_speed = message.speedL
+    motor_right_speed = message.speedR
     lock.release()
 
 
@@ -88,7 +88,7 @@ driver.set_motor_pwm_frequency(1000)
 
 rospy.loginfo("Starting main loop...")
 
-rate = rospy.Rate(30)
+rate = rospy.Rate(50)
 
 while not rospy.is_shutdown():
 
