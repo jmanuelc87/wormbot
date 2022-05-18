@@ -32,7 +32,7 @@ class AbstractCommand(Command):
 
 class IncreaseSpeedCommand(AbstractCommand):
 
-    def __init__(self, speed, speed_limits_x=[0.0, 2.0], speed_limits_y=[0.0, 1.2]):
+    def __init__(self, speed, speed_limits_x=[0.0, 2.0], speed_limits_y=[0.0, 1.0]):
         self.speed_limits_x = speed_limits_x
         self.speed_limits_y = speed_limits_y
         self.speed = speed
@@ -52,7 +52,7 @@ class IncreaseSpeedCommand(AbstractCommand):
 
     def increase(self):
         if self.speed['angular'] <= self.speed_limits_x[1]:
-            self.speed['angular'] += 0.3
+            self.speed['angular'] += 0.2
 
         if self.speed['angular'] >= self.speed_limits_x[1]:
             self.speed['angular'] = self.speed_limits_x[1]
@@ -66,7 +66,7 @@ class IncreaseSpeedCommand(AbstractCommand):
 
 class DecreaseSpeedCommand(AbstractCommand):
 
-    def __init__(self, speed, speed_limits_x=[0.0, 5.0], speed_limits_y=[0.0, 1.0]):
+    def __init__(self, speed, speed_limits_x=[0.0, 2.0], speed_limits_y=[0.0, 1.0]):
         self.speed_limits_x = speed_limits_x
         self.speed_limits_y = speed_limits_y
         self.speed = speed
@@ -86,7 +86,7 @@ class DecreaseSpeedCommand(AbstractCommand):
 
     def decrease(self):
         if self.speed['angular'] >= self.speed_limits_x[0]:
-            self.speed['angular'] -= 0.3
+            self.speed['angular'] -= 0.2
         
         if self.speed['angular'] <= self.speed_limits_x[0]:
             self.speed['angular'] = self.speed_limits_x[0]
