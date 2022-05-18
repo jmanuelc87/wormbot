@@ -20,7 +20,10 @@ invoker = CommandInvoker()
 class LeftThumbListener(AxisListener):
 
     def onAxisMoveAction(self, x, y):
-        msg = invoker.move(Twist(), x, y)
+        if y > 0.0:
+            msg = invoker.move(Twist(), -1 * x, y)
+        else:
+            msg = invoker.move(Twist(), x, y)
         return msg
 
 
