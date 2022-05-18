@@ -1,0 +1,8 @@
+walleye:
+  rate: 35
+  use_csi_camera: False
+  use_cv2_camera: True
+  width: 1280
+  height: 720
+  usecalibration: False
+  npzfilepath: config/cameracalibration.npz

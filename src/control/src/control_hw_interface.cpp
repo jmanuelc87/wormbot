@@ -81,8 +81,8 @@ bool control_hw_interface::ControlHWInterface::write()
     ROS_INFO_THROTTLE_NAMED(120, "write", "%0.2f, %0.2f", left_speed, right_speed);
 
     drivers::SpeedMessage msg;
-    msg.speedL = left_speed;
-    msg.speedR = right_speed;
+    msg.speedL = round(left_speed);
+    msg.speedR = round(right_speed);
 
     set_motor_speed.publish(msg);
 

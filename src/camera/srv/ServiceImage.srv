@@ -1,0 +1,4 @@
+float32 rescale
+---
+int8 retval
+sensor_msgs/Image image
