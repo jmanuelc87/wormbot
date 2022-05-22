@@ -5,17 +5,11 @@ import os
 import rospkg
 import rospy
 
+from cv2 import VideoCapture
 from camera import rescaleFrame
 from camera.srv import ServiceImage, ServiceImageResponse
 from cv_bridge import CvBridge, CvBridgeError
 from sensor_msgs.msg import Image, CompressedImage
-from pip._internal.utils.misc import get_installed_distributions
-
-installed_packages = [package.project_name for package in get_installed_distributions()]
-
-if 'jetcam' in installed_packages:
-    from jetcam import CSICamera
-    from jetcam import USBCamera
 
 
 def main():
@@ -55,10 +49,12 @@ def main():
     rospy.Service(ns + 'get_camera_picture', ServiceImage, handle_camera_picture)
 
     if use_csi_camera:
+        from jetcam import CSICamera
         rospy.loginfo("Using CSICamera %s", use_csi_camera)
         camera = CSICamera(width=width, height=height)
     else:
         if not use_cv2_camera:
+            from jetcam import USBCamera
             rospy.loginfo("Using USBCamera")
             camera = USBCamera(width=width, height=height)
         else:

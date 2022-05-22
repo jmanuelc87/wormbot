@@ -12,7 +12,8 @@ class BlobTracker:
         # This publisher  uses Point message to publish
         # x,y: x,y relative poses of the center of the blob detected relative to the center of teh image
         # z: size of the blob detected
-        self.pub_blob = rospy.Publisher(self.point_blob_topic, Point, queue_size=1)
+        self.pub_blob = rospy.Publisher(
+            self.point_blob_topic, Point, queue_size=1)
 
     def blob_detect(self,
                     image,
@@ -64,7 +65,7 @@ class BlobTracker:
         hsv = cv2.cvtColor(dilatated, cv2.COLOR_BGR2HSV)
 
         # - Apply HSV threshold
-        mask = cv2.inRange(hsv, tuple(hsv_min), tuple(hsv_max))
+        mask = cv2.inRange(hsv, hsv_min, hsv_max)
 
         # converts back image for using cpu only
         mask = cv2.UMat.get(mask)
@@ -137,7 +138,8 @@ class BlobTracker:
         mask = np.zeros(image.shape, np.uint8)
 
         # --- Copy the pixels from the original image corresponding to the window
-        mask[y_min_px:y_max_px, x_min_px:x_max_px] = image[y_min_px:y_max_px, x_min_px:x_max_px]
+        mask[y_min_px:y_max_px,
+             x_min_px:x_max_px] = image[y_min_px:y_max_px, x_min_px:x_max_px]
 
         # --- return the mask
         return mask
@@ -160,9 +162,11 @@ class BlobTracker:
         line_length = int(size, dimension)
 
         # -- X
-        image = cv2.line(image, (center_x, center_y), (center_x + line_length, center_y), (0, 0, 255), line)
+        image = cv2.line(image, (center_x, center_y),
+                         (center_x + line_length, center_y), (0, 0, 255), line)
         # -- Y
-        image = cv2.line(image, (center_x, center_y), (center_x, center_y + line_length), (0, 255, 0), line)
+        image = cv2.line(image, (center_x, center_y),
+                         (center_x, center_y + line_length), (0, 255, 0), line)
 
         return image
 

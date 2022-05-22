@@ -1,18 +1,20 @@
 #! /usr/bin/env python
 import rospy
-from blob_tracking import BlobTracker, detect_publish
-from blob_tracking.cfg import HSVLimitsConfig
+from blob_tracking import BlobColorTracker, detect_publish
+from blob_tracking.cfg import LimitsConfig
 from camera import CameraSensor
 from cv_bridge import CvBridge, CvBridgeError
 from dynamic_reconfigure.server import Server
 from sensor_msgs.msg import Image, CompressedImage
 
 # HSV limits default values
-hsv_min = [0, 255, 255]
-hsv_max = [23, 255, 255]
+lowerb = [0, 0, 0]
+upperb = [255, 255, 255]
+params=[5, 2.7, (5,5)]
+show = False
 
 # We define the detection area [x_min, y_min, x_max, y_max] adimensional (0.0 to 1.0) starting from top left corner
-window = [0.05, 0.05, 0.95, 0.95]
+window = [0.1, 0.1, 0.9, 0.9]
 
 ns = rospy.get_namespace()
 
@@ -20,13 +22,18 @@ ns = rospy.get_namespace()
 def reconfigure_callback(config, level):
     rospy.loginfo("Reconfigure Request")
     # Assign configuration values
-    hsv_max[0] = config.h_max
-    hsv_max[1] = config.s_max
-    hsv_max[2] = config.v_max
-    hsv_min[0] = config.h_min
-    hsv_min[1] = config.s_min
-    hsv_min[2] = config.v_min
-    rospy.loginfo("hsv_max: %s, hsv_min: %s", hsv_max, hsv_min)
+    upperb[0] = config.h_max
+    upperb[1] = config.s_max
+    upperb[2] = config.v_max
+    lowerb[0] = config.h_min
+    lowerb[1] = config.s_min
+    lowerb[2] = config.v_min
+    params[0] = config.blur
+    params[1] = config.sigma
+    params[2] = (config.kernel, config.kernel)
+    show = config.show
+
+    rospy.loginfo("upperb: %s, lowerb: %s, publish: %s", upperb, lowerb, show)
     return config
 
 
@@ -37,9 +44,9 @@ pub_image_compressed = rospy.Publisher(ns + "camera/keypoints/compressed", Compr
 
 rospy.init_node("blob_tracking_node", log_level=rospy.DEBUG)
 
-srv = Server(HSVLimitsConfig, reconfigure_callback)
+srv = Server(LimitsConfig, reconfigure_callback)
 
-blob_tracker = BlobTracker()
+blob_tracker = BlobColorTracker()
 serviceImage = CameraSensor()
 
 # node namespace
@@ -53,7 +60,7 @@ while not rospy.is_shutdown():
     cv_image = serviceImage.get_image()
 
     # Detect blobs
-    image_with_keypoints = detect_publish(cv_image, hsv_min, hsv_max, blob_tracker)
+    image_with_keypoints = detect_publish(cv_image, tuple(lowerb), tuple(upperb), blob_tracker, show_image=show, params=params)
 
     try:
         pub_image_raw.publish(bridge.cv2_to_imgmsg(image_with_keypoints, encoding='bgr8'))
