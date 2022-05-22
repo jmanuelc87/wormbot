@@ -1,4 +1,4 @@
-walleye:
+wormbot:
   rate: 35
   use_csi_camera: False
   use_cv2_camera: True

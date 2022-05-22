@@ -9,10 +9,10 @@ class CameraSensor:
         self.compressed = compressed
         self.bridge_object = CvBridge()
         if not self.compressed:
-            self.camera_topic = "/walleye/camera/raw"
+            self.camera_topic = "/wormbot/camera/raw"
             self.image_sub = rospy.Subscriber(self.camera_topic, Image, self.camera_callback)
         else:
-            self.camera_topic = "/walleye/camera/compressed"
+            self.camera_topic = "/wormbot/camera/compressed"
             self.image_sub = rospy.Subscriber(self.camera_topic, CompressedImage, self.camera_callback)
         self.__check_cv_image_ready()
 
