@@ -11,22 +11,13 @@ class BlobColorTracker:
     def __init__(self):
         self.ns = rospy.get_namespace()
         self.point_blob_topic = self.ns + "blob/point_blob"
-        self.blurred_blob_topic = self.ns + "blob/blurred_blob/compressed"
-        self.eroded_blob_topic = self.ns + "blob/eroded_blob/compressed"
-        self.dilated_blob_topic = self.ns + "blob/dilated_blob/compressed"
         # This publisher  uses Point message to publish
         # x,y: x,y relative poses of the center of the blob detected relative to the center of teh image
         # z: size of the blob detected
         self.pub_blob = rospy.Publisher(
             self.point_blob_topic, Point, queue_size=1)
-        self.pub_blob_1 = rospy.Publisher(
-            self.blurred_blob_topic, CompressedImage, queue_size=1)
-        self.pub_blob_2 = rospy.Publisher(
-            self.eroded_blob_topic, CompressedImage, queue_size=1)
-        self.pub_blob_3 = rospy.Publisher(
-            self.dilated_blob_topic, CompressedImage, queue_size=1)
 
-    def blob_detect(self, image, lowerb, upperb, blur=0, sigma=0, kernel=(5, 5), color_space=cv2.COLOR_BGR2HSV, blob_params=None, search_window=None, publish_blob=False):
+    def blob_detect(self, image, lowerb, upperb, blur=0, sigma=0, kernel=(5, 5), color_space=cv2.COLOR_BGR2HSV, blob_params=None, search_window=None, show_image=False):
         """
         :param image: The frame
         :param lowerb: minimum threshold of the filter []
@@ -36,7 +27,7 @@ class BlobColorTracker:
         :param kernel: kernel value for erode & dilate operators
         :param blob_params: blob parameters (default None)
         :param search_window: window where to search as [x_min, y_min, x_max, y_max] adimensional (0.0 to 1.0) starting from top left corner
-        :param publish_blob: if each stage should be published in a topic
+        :param show_image: if each stage should be published in a topic
         """
         # Create an UMat image for proccesing in the GPU
         uimg = cv2.UMat(image)
@@ -47,20 +38,20 @@ class BlobColorTracker:
         else:
             ublurred = cv2.blur(uimg, (5, 5))
 
-        if publish_blob:
-            self.publish_to_topic(cv2.UMat.get(ublurred), self.pub_blob_1)
+        if show_image:
+            cv2.imshow('Blob Blurred', ublurred)
 
         # Erode image
         ueroded = cv2.erode(ublurred, kernel, iterations=2)
 
-        if publish_blob:
-            self.publish_to_topic(cv2.UMat.get(ueroded), self.pub_blob_2)
+        if show_image:
+           cv2.imshow('Blob Erode', ueroded)
 
         # Dilate the image
         udilatated = cv2.dilate(ueroded, kernel, iterations=2)
 
-        if publish_blob:
-            self.publish_to_topic(cv2.UMat.get(udilatated), self.pub_blob_3)
+        if show_image:
+            cv2.imshow('Blob Dilated', udilatated)
 
         # - Convert image
         uimgconv = cv2.cvtColor(udilatated, color_space)
@@ -74,6 +65,9 @@ class BlobColorTracker:
         # - Search window
         if search_window is None:
             search_window = [0.1, 0.1, 0.9, 0.9]
+
+        if show_image:
+            cv2.imshow('Blob Mask', mask)
 
         # - Cut the image using the search mask
         mask = self.apply_search_window(mask, search_window)
@@ -145,9 +139,28 @@ class BlobColorTracker:
         # --- return the mask
         return mask
 
-    def publish_to_topic(self, image, pub):
-        try:
-            pub.publish(bridge.cv2_to_compressed_imgmsg(
-                image, dst_format='jpeg'))
-        except CvBridgeError as e:
-            rospy.logerror("%s", e)
+    def draw_frame(self, image, dimension=0.3, line=2):
+        """
+        Draw X Y frame
+        :param image:
+        :param dimension:
+        :param line:
+        :return: image
+        """
+
+        rows = image.shape[0]
+        cols = image.shape[1]
+        size = min([rows, cols])
+        center_x = int(cols / 2)
+        center_y = int(rows / 2)
+
+        line_length = int(size)
+
+        # -- X
+        image = cv2.line(image, (center_x, center_y),
+                         (center_x + line_length, center_y), (0, 0, 255), line)
+        # -- Y
+        image = cv2.line(image, (center_x, center_y),
+                         (center_x, center_y + line_length), (0, 255, 0), line)
+
+        return image

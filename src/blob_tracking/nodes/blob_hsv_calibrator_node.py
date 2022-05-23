@@ -2,9 +2,8 @@
 import cv2
 import numpy as np
 import rospy
-from blob_tracking import BlobTracker
+from blob_tracking import BlobColorTracker, detect_publish
 from camera import CameraSensor, rescaleFrame
-from detect_publish import detect_publish
 
 
 def nothing(x):
@@ -35,7 +34,7 @@ phMin = psMin = pvMin = phMax = psMax = pvMax = 0
 rospy.init_node('blob_hsv_calibrator_node', log_level=rospy.DEBUG)
 
 camera_service = CameraSensor(compressed=True)
-blob_tracker = BlobTracker()
+blob_tracker = BlobColorTracker()
 
 loop_rate = rospy.Rate(30)
 

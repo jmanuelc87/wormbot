@@ -50,7 +50,7 @@ def get_blob_relative_position(image, keyPoint):
 
 def detect_publish(image, lower, upper, blob_tracker, show_image=False, params=[5, 2.7, (5,5)]):
     image_with_keypoints = image
-    keypoints = blob_tracker.blob_detect(image, lower, upper, blur=params[0], sigma=params[1], kernel=params[2], publish_blob=show_image)
+    keypoints = blob_tracker.blob_detect(image, lower, upper, blur=params[0], sigma=params[1], kernel=params[2], show_image=show_image)
 
     sorted_keypoints = sorted(keypoints[0], reverse=True, key=lambda e: e.size)
 
